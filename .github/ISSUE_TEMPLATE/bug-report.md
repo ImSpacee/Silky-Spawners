@@ -1,7 +1,7 @@
 ---
 name: Bug Report
 about: Bug Report Template - Use this to report issues!
-title: ''
+title: "[B]"
 labels: bug
 assignees: ''
 
