@@ -8,14 +8,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockMobSpawner;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,6 +23,8 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
+
 
 @Mod(modid = References.MOD_ID, name = References.NAME, version = References.VERSION)
 public class Main {
@@ -48,6 +45,7 @@ public class Main {
 	public static void init(FMLInitializationEvent event)
 	{
 		MinecraftForge.EVENT_BUS.register(new Main());
+		System.out.println("SilkySpawners has loaded with no errors.");
 	}
 	
 	@EventHandler
@@ -59,26 +57,30 @@ public class Main {
 	@SubscribeEvent
     public void BlockDrop(BlockEvent.BreakEvent e)
     {
-    	if(e.getState().getBlock() == null || e.getWorld() == null || e.getPos() == null || e.getWorld().isRemote || e.getPlayer() == null || !e.getWorld().getGameRules().getBoolean("doTileDrops"))
+		Block block = e.getState().getBlock();
+		EntityPlayer player = e.getPlayer();
+		World world = e.getWorld();
+		BlockPos pos = e.getPos();
+    	if(block == null || world == null || pos == null || world.isRemote || player == null || !world.getGameRules().getBoolean("doTileDrops"))
     		return;
-    	if(e.getPlayer().getActiveHand() == null)
+    	if(player.getActiveHand() == null)
     		return;
-    	if(e.getPlayer().getHeldItem(e.getPlayer().getActiveHand()) == null)
+    	if(player.getHeldItem(player.getActiveHand()) == null)
     		return;
-    	if(e.getWorld().getTileEntity(e.getPos()) == null)
+    	if(world.getTileEntity(pos) == null)
 			return;
-    	int toollevel = e.getPlayer().getHeldItem(e.getPlayer().getActiveHand()).getItem().getHarvestLevel(e.getPlayer().getHeldItem(e.getPlayer().getActiveHand()), "pickaxe",e.getPlayer(),e.getState());
-    	if(e.getPlayer().getHeldItem(e.getPlayer().getActiveHand()) == null || EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByLocation("minecraft:silk_touch"), e.getPlayer().getHeldItem(e.getPlayer().getActiveHand())) <= 0 ||  toollevel < BlockUtil.PickaxeLevel(e.getState()) )
+    	int toollevel = player.getHeldItem(player.getActiveHand()).getItem().getHarvestLevel(player.getHeldItem(player.getActiveHand()), "pickaxe",player,e.getState());
+    	if(player.getHeldItem(player.getActiveHand()) == null || EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByLocation("minecraft:silk_touch"), player.getHeldItem(player.getActiveHand())) <= 0 ||  toollevel < BlockUtil.PickaxeLevel(e.getState()) )
     		return;
 
-    	if(e.getState().getBlock() instanceof BlockMobSpawner || e.getWorld().getTileEntity(e.getPos()) instanceof TileEntityMobSpawner)
+    	if(block instanceof BlockMobSpawner || world.getTileEntity(pos) instanceof TileEntityMobSpawner)
     	{
-    		int meta = e.getState().getBlock().getMetaFromState(e.getState());
+    		int meta = block.getMetaFromState(e.getState());
     		if(meta < 0)
     			meta = 0;
-    		ItemStack stack = new ItemStack(e.getState().getBlock(),1,meta);
-    		BlockUtil.BlockDrop(e.getWorld(),e.getPos(),stack);
-    		e.getWorld().setBlockToAir(e.getPos());
+    		ItemStack stack = new ItemStack(block,1,meta);
+    		BlockUtil.BlockDrop(world,pos,stack);
+    		world.setBlockToAir(pos);
     		e.setCanceled(true);
     	}
     }
