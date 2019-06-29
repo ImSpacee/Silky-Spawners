@@ -10,6 +10,8 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -61,19 +63,20 @@ public class Main {
 		EntityPlayer player = e.getPlayer();
 		World world = e.getWorld();
 		BlockPos pos = e.getPos();
+		TileEntity tile = world.getTileEntity(pos);
     	if(block == null || world == null || pos == null || world.isRemote || player == null || !world.getGameRules().getBoolean("doTileDrops"))
     		return;
     	if(player.getActiveHand() == null)
     		return;
     	if(player.getHeldItem(player.getActiveHand()) == null)
     		return;
-    	if(world.getTileEntity(pos) == null)
+    	if(tile == null)
 			return;
     	int toollevel = player.getHeldItem(player.getActiveHand()).getItem().getHarvestLevel(player.getHeldItem(player.getActiveHand()), "pickaxe",player,e.getState());
     	if(player.getHeldItem(player.getActiveHand()) == null || EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByLocation("minecraft:silk_touch"), player.getHeldItem(player.getActiveHand())) <= 0 ||  toollevel < BlockUtil.PickaxeLevel(e.getState()) )
     		return;
 
-    	if(block instanceof BlockMobSpawner || world.getTileEntity(pos) instanceof TileEntityMobSpawner)
+    	if(block instanceof BlockMobSpawner || tile instanceof TileEntityMobSpawner)
     	{
     		int meta = block.getMetaFromState(e.getState());
     		if(meta < 0)
@@ -81,7 +84,16 @@ public class Main {
     		ItemStack stack = new ItemStack(block,1,meta);
     		BlockUtil.BlockDrop(world,pos,stack);
     		world.setBlockToAir(pos);
+    		NBTTagCompound nbt = new NBTTagCompound();
+    		setSpawnID(stack,world,tile,nbt);
     		e.setCanceled(true);
     	}
     }
+	
+	public void setSpawnID(ItemStack stack, World world, TileEntity tile, NBTTagCompound nbt)
+	{
+		NBTTagCompound data = nbt.getCompoundTag("SpawnData");
+		String name = data.getString("id");
+		nbt.setString("SpawnData", name);
+	}
 }
