@@ -124,7 +124,7 @@ public class Main {
 		ItemStack item;
 
 		// Debug purposes only
-		// Debug.debug("Blockstate: " + state + "\nEntity: " + entity + "\nBlockPos: " + blockPos + "\nWorld: " + world + "\nTileEntity: " + tile);
+		Debug.debug("Blockstate: " + state + "\nEntity: " + entity + "\nBlockPos: " + blockPos + "\nWorld: " + world + "\nTileEntity: " + tile);
 
 		if (entity instanceof EntityLiving)
 		{
@@ -135,8 +135,8 @@ public class Main {
 		}
 
 		// Debug purposes only
-		// Debug.debug("hand: " + hand + "\nItemStack: " + item);
-		// Debug.debug(Blocks.MOB_SPAWNER.getLocalizedName() + state.getBlock().getLocalizedName());
+		Debug.debug("hand: " + hand + "\nItemStack: " + item);
+		Debug.debug(Blocks.MOB_SPAWNER.getLocalizedName() + state.getBlock().getLocalizedName());
 
 		if (Objects.equals(Blocks.MOB_SPAWNER.getRegistryName(), state.getBlock().getRegistryName()))
 		{
@@ -146,36 +146,36 @@ public class Main {
 				NBTTagCompound nbtBlock = item.getSubCompound("BlockEntityTag");
 
 				// Debug purposes only
-				// Debug.debug("NBTItem: " + nbtBlock + "\nTile Entity Mob Spawner: " + TileEntityMobSpawner);
+				Debug.debug("NBTItem: " + nbtBlock + "\nTile Entity Mob Spawner: " + TileEntityMobSpawner);
 
 				if (nbtBlock != null)
 				{
 					NBTTagCompound nbtTileEntityNew = new NBTTagCompound();
 					// Debug purposes only
-					// Debug.debug("NBTNew (1): " + nbtTileEntityNew);
+					Debug.debug("NBTNew (1): " + nbtTileEntityNew);
 
 					nbtTileEntityNew = TileEntityMobSpawner.writeToNBT(nbtTileEntityNew);
 					// Debug purposes only
-					// Debug.debug("NBTNew (2): " + nbtTileEntityNew);
+					Debug.debug("NBTNew (2): " + nbtTileEntityNew);
 
 					NBTTagCompound nbtTileEntityOld = nbtTileEntityNew.copy();
 					// Debug purposes only
-					// Debug.debug("NBTOld: " + nbtTileEntityNew);
+					Debug.debug("NBTOld: " + nbtTileEntityNew);
 
 					nbtTileEntityNew.merge(nbtBlock);
 					// Debug purposes only
-					// Debug.debug("NBTNew (3): " + nbtTileEntityNew);
+					Debug.debug("NBTNew (3): " + nbtTileEntityNew);
 
 					nbtTileEntityNew.setInteger("x", blockPos.getX());
 					nbtTileEntityNew.setInteger("y", blockPos.getY());
 					nbtTileEntityNew.setInteger("z", blockPos.getZ());
 					// Debug purposes only
-					// Debug.debug("NBTNew (4): " + nbtTileEntityNew);
+					Debug.debug("NBTNew (4): " + nbtTileEntityNew);
 
 					if (!nbtTileEntityNew.equals(nbtTileEntityOld))
 					{
 						// Debug purposes only
-						// Debug.debug("NBTNew (5): " + nbtTileEntityNew);
+						Debug.debug("NBTNew (5): " + nbtTileEntityNew);
 						tile.readFromNBT(nbtTileEntityNew);
 						tile.markDirty();
 					}
