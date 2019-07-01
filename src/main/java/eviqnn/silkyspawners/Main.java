@@ -5,9 +5,13 @@ import eviqnn.silkyspawners.util.References;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockMobSpawner;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -25,6 +29,8 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Objects;
 
 
 @Mod(modid = References.MOD_ID, name = References.NAME, version = References.VERSION, acceptableRemoteVersions = "*")
@@ -51,6 +57,141 @@ public class Main {
 	public static void postinit(FMLPostInitializationEvent event)
 	{
 		logger.info("SilkySpawners has loaded with no errors.");
+	}
+
+	@SubscribeEvent
+	public void blockDrop(BlockEvent.BreakEvent e)
+	{
+		// Code Cleanup
+		Block block = e.getState().getBlock();
+		EntityPlayer player = e.getPlayer();
+		World world = e.getWorld();
+		BlockPos pos = e.getPos();
+		TileEntity tile = world.getTileEntity(pos);
+		EnumHand hand = player.getActiveHand();
+		ItemStack item = player.getHeldItem(hand);
+
+		if (!checkValid(block, player, world, pos, tile, hand, item))
+		{
+			logger.debug("Invalid parameters!");
+			return;
+		}
+
+		if (world.isRemote)
+		{
+			// Disabled as it had spammed debug console on client
+			//logger.debug("World is remote");
+			return;
+		}
+
+		if(!world.getGameRules().getBoolean("doTileDrops"))
+		{
+			// Disabled as it had spammed debug console
+			// logger.debug("DoTileDrops is off");
+			return;
+		}
+
+		int toollevel = item.getItem().getHarvestLevel(item, "pickaxe", player, e.getState());
+		Enchantment SILKTOUCH = Enchantment.getEnchantmentByLocation("minecraft:silk_touch");
+		if(EnchantmentHelper.getEnchantmentLevel(SILKTOUCH, player.getHeldItem(hand)) <= 0
+				||  toollevel < BlockUtil.pickaxeLevel(e.getState()) )
+		{
+			logger.debug("Not valid tool");
+			return;
+		}
+
+		if(block instanceof BlockMobSpawner || tile instanceof TileEntityMobSpawner)
+		{
+			breakSpawner(block, world, pos, tile, e);
+		}
+	}
+
+	@SubscribeEvent
+	public void blockPlace(BlockEvent.EntityPlaceEvent e)
+	{
+		IBlockState lState = e.getPlacedBlock();
+		logger.debug("State: " + lState);
+
+		Entity lEntity = e.getEntity();
+		logger.debug("Entity: " + lEntity);
+
+		BlockPos lBlockPos = e.getPos();
+		logger.debug("BlockPos: " + lBlockPos);
+
+		World world = lEntity.getEntityWorld();
+		logger.debug("World: " + world);
+
+		if (world == null)
+		{
+			return;
+		}
+
+		EnumHand hand;
+		ItemStack item;
+		if (lEntity instanceof EntityLiving)
+		{
+			hand = ((EntityLiving) lEntity).getActiveHand();
+			item = ((EntityLiving) lEntity).getHeldItem(hand);
+		}
+		else if (lEntity instanceof EntityPlayer)
+		{
+			hand = ((EntityPlayer) lEntity).getActiveHand();
+			item = ((EntityPlayer) lEntity).getHeldItem(hand);
+		}
+		else
+		{
+			return;
+		}
+
+		logger.debug("Hand: " + hand);
+
+		logger.debug("Item: " + item);
+
+		TileEntity lTileEntity = world.getTileEntity(lBlockPos);
+		logger.debug("Tile Entity: " + lTileEntity);
+
+		logger.debug(Blocks.MOB_SPAWNER.getLocalizedName());
+		logger.debug(lState.getBlock().getLocalizedName());
+
+		if (Objects.equals(Blocks.MOB_SPAWNER.getRegistryName(), lState.getBlock().getRegistryName()))
+		{
+			if (lTileEntity instanceof TileEntityMobSpawner)
+			{
+				TileEntityMobSpawner lTileEntityMobSpawner = (TileEntityMobSpawner) lTileEntity;
+				logger.debug("Tile Entity Mob Spawner: " + lTileEntityMobSpawner);
+
+				NBTTagCompound nbtBlock = item.getSubCompound("BlockEntityTag");
+				logger.debug("NBTItem: " + nbtBlock);
+
+				if (nbtBlock != null)
+				{
+					NBTTagCompound nbtTileEntityNew = new NBTTagCompound();
+					logger.debug("NBTNew (1): " + nbtTileEntityNew);
+
+					nbtTileEntityNew = lTileEntityMobSpawner.writeToNBT(nbtTileEntityNew);
+					logger.debug("NBTNew (2): " + nbtTileEntityNew);
+
+					NBTTagCompound nbtTileEntityOld = nbtTileEntityNew.copy();
+					logger.debug("NBTOld: " + nbtTileEntityNew);
+
+					nbtTileEntityNew.merge(nbtBlock);
+					logger.debug("NBTNew (3): " + nbtTileEntityNew);
+
+					nbtTileEntityNew.setInteger("x", lBlockPos.getX());
+					nbtTileEntityNew.setInteger("y", lBlockPos.getY());
+					nbtTileEntityNew.setInteger("z", lBlockPos.getZ());
+
+					logger.debug("NBTNew (4): " + nbtTileEntityNew);
+
+					if (!nbtTileEntityNew.equals(nbtTileEntityOld))
+					{
+						logger.debug("NBTNew (5): " + nbtTileEntityNew);
+						lTileEntity.readFromNBT(nbtTileEntityNew);
+						lTileEntity.markDirty();
+					}
+				}
+			}
+		}
 	}
 
 	private boolean checkValid(Block block, EntityPlayer player, World world, BlockPos pos, TileEntity tile, EnumHand hand, ItemStack item)
@@ -101,53 +242,6 @@ public class Main {
 
 		return result;
 	}
-
-	@SubscribeEvent
-    public void blockDrop(BlockEvent.BreakEvent e)
-    {
-		// Code Cleanup
-		Block block = e.getState().getBlock();
-		EntityPlayer player = e.getPlayer();
-		World world = e.getWorld();
-		BlockPos pos = e.getPos();
-		TileEntity tile = world.getTileEntity(pos);
-		EnumHand hand = player.getActiveHand();
-		ItemStack item = player.getHeldItem(hand);
-
-		if (!checkValid(block, player, world, pos, tile, hand, item))
-		{
-			logger.debug("Invalid parameters!");
-			return;
-		}
-
-	    if (world.isRemote)
-	    {
-		    // Disabled as it had spammed debug console on client
-		    //logger.debug("World is remote");
-		    return;
-	    }
-
-    	if(!world.getGameRules().getBoolean("doTileDrops"))
-	    {
-    		// Disabled as it had spammed debug console
-		    // logger.debug("DoTileDrops is off");
-	    	return;
-	    }
-
-    	int toollevel = item.getItem().getHarvestLevel(item, "pickaxe", player, e.getState());
-    	Enchantment SILKTOUCH = Enchantment.getEnchantmentByLocation("minecraft:silk_touch");
-    	if(EnchantmentHelper.getEnchantmentLevel(SILKTOUCH, player.getHeldItem(hand)) <= 0
-			    ||  toollevel < BlockUtil.pickaxeLevel(e.getState()) )
-	    {
-	    	logger.debug("Not valid tool");
-	    	return;
-	    }
-
-    	if(block instanceof BlockMobSpawner || tile instanceof TileEntityMobSpawner)
-    	{
-		    breakSpawner(block, world, pos, tile, e);
-    	}
-    }
 
 	private void breakSpawner(Block block, World world, BlockPos pos, TileEntity tile, BlockEvent.BreakEvent e)
 	{
