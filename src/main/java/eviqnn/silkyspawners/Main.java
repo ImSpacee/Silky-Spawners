@@ -30,11 +30,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.Objects;
-import java.util.Properties;
 
 
 @Mod(modid = References.MOD_ID, name = References.NAME, version = References.VERSION, acceptableRemoteVersions = "*")
@@ -45,42 +41,10 @@ public class Main {
 
 	public static Logger logger;
 
-	private static boolean canDebug = false;
-
-	private static File config;
-
-	private static void readProperties()
-	{
-		try {
-			Properties lProperties = new Properties();
-			if (config.exists())
-			{
-				lProperties.load(new FileInputStream(config));
-				String debug = lProperties.getProperty("debug", "false");
-				lProperties.setProperty("debug", debug);
-				FileOutputStream out = new FileOutputStream(config);
-				lProperties.store(out, "Set \"debug\" to true for debug info");
-				out.close();
-				canDebug = Boolean.getBoolean(debug);
-			}
-			else
-			{
-				lProperties.setProperty("debug", "false");
-				FileOutputStream out = new FileOutputStream(config);
-				lProperties.store(out, "Set \"debug\" to true for debug info");
-			}
-		} catch (Throwable t)
-		{
-			t.printStackTrace();
-		}
-	}
-
 	@EventHandler
 	public static void preInit(FMLPreInitializationEvent event)
 	{
-		config = event.getSuggestedConfigurationFile();
 		logger = event.getModLog();
-		readProperties();
 	}
 
 	@EventHandler
@@ -109,21 +73,21 @@ public class Main {
 
 		if (!checkValid(block, player, world, pos, tile, hand, item))
 		{
-			debug("Invalid parameters!");
+			logger.debug("Invalid parameters!");
 			return;
 		}
 
 		if (world.isRemote)
 		{
 			// Disabled as it had spammed debug console on client
-			//debug("World is remote");
+			//logger.debug("World is remote");
 			return;
 		}
 
 		if(!world.getGameRules().getBoolean("doTileDrops"))
 		{
 			// Disabled as it had spammed debug console
-			// debug("DoTileDrops is off");
+			// logger.debug("DoTileDrops is off");
 			return;
 		}
 
@@ -132,7 +96,7 @@ public class Main {
 		if(EnchantmentHelper.getEnchantmentLevel(SILKTOUCH, player.getHeldItem(hand)) <= 0
 				||  toollevel < BlockUtil.pickaxeLevel(e.getState()) )
 		{
-			debug("Not valid tool");
+			logger.debug("Not valid tool");
 			return;
 		}
 
@@ -146,16 +110,16 @@ public class Main {
 	public void blockPlace(BlockEvent.EntityPlaceEvent e)
 	{
 		IBlockState lState = e.getPlacedBlock();
-		debug("State: " + lState);
+		logger.debug("State: " + lState);
 
 		Entity lEntity = e.getEntity();
-		debug("Entity: " + lEntity);
+		logger.debug("Entity: " + lEntity);
 
 		BlockPos lBlockPos = e.getPos();
-		debug("BlockPos: " + lBlockPos);
+		logger.debug("BlockPos: " + lBlockPos);
 
 		World world = lEntity.getEntityWorld();
-		debug("World: " + world);
+		logger.debug("World: " + world);
 
 		if (world == null)
 		{
@@ -179,49 +143,49 @@ public class Main {
 			return;
 		}
 
-		debug("Hand: " + hand);
+		logger.debug("Hand: " + hand);
 
-		debug("Item: " + item);
+		logger.debug("Item: " + item);
 
 		TileEntity lTileEntity = world.getTileEntity(lBlockPos);
-		debug("Tile Entity: " + lTileEntity);
+		logger.debug("Tile Entity: " + lTileEntity);
 
-		debug(Blocks.MOB_SPAWNER.getLocalizedName());
-		debug(lState.getBlock().getLocalizedName());
+		logger.debug(Blocks.MOB_SPAWNER.getLocalizedName());
+		logger.debug(lState.getBlock().getLocalizedName());
 
 		if (Objects.equals(Blocks.MOB_SPAWNER.getRegistryName(), lState.getBlock().getRegistryName()))
 		{
 			if (lTileEntity instanceof TileEntityMobSpawner)
 			{
 				TileEntityMobSpawner lTileEntityMobSpawner = (TileEntityMobSpawner) lTileEntity;
-				debug("Tile Entity Mob Spawner: " + lTileEntityMobSpawner);
+				logger.debug("Tile Entity Mob Spawner: " + lTileEntityMobSpawner);
 
 				NBTTagCompound nbtBlock = item.getSubCompound("BlockEntityTag");
-				debug("NBTItem: " + nbtBlock);
+				logger.debug("NBTItem: " + nbtBlock);
 
 				if (nbtBlock != null)
 				{
 					NBTTagCompound nbtTileEntityNew = new NBTTagCompound();
-					debug("NBTNew (1): " + nbtTileEntityNew);
+					logger.debug("NBTNew (1): " + nbtTileEntityNew);
 
 					nbtTileEntityNew = lTileEntityMobSpawner.writeToNBT(nbtTileEntityNew);
-					debug("NBTNew (2): " + nbtTileEntityNew);
+					logger.debug("NBTNew (2): " + nbtTileEntityNew);
 
 					NBTTagCompound nbtTileEntityOld = nbtTileEntityNew.copy();
-					debug("NBTOld: " + nbtTileEntityNew);
+					logger.debug("NBTOld: " + nbtTileEntityNew);
 
 					nbtTileEntityNew.merge(nbtBlock);
-					debug("NBTNew (3): " + nbtTileEntityNew);
+					logger.debug("NBTNew (3): " + nbtTileEntityNew);
 
 					nbtTileEntityNew.setInteger("x", lBlockPos.getX());
 					nbtTileEntityNew.setInteger("y", lBlockPos.getY());
 					nbtTileEntityNew.setInteger("z", lBlockPos.getZ());
 
-					debug("NBTNew (4): " + nbtTileEntityNew);
+					logger.debug("NBTNew (4): " + nbtTileEntityNew);
 
 					if (!nbtTileEntityNew.equals(nbtTileEntityOld))
 					{
-						debug("NBTNew (5): " + nbtTileEntityNew);
+						logger.debug("NBTNew (5): " + nbtTileEntityNew);
 						lTileEntity.readFromNBT(nbtTileEntityNew);
 						lTileEntity.markDirty();
 					}
@@ -271,7 +235,7 @@ public class Main {
 
 		if(tile == null)
 		{
-			debug("Tile entity is null");
+			logger.debug("Tile entity is null");
 			result = false;
 		}
 
@@ -282,17 +246,17 @@ public class Main {
 	private void breakSpawner(Block block, World world, BlockPos pos, TileEntity tile, BlockEvent.BreakEvent e)
 	{
 		e.setCanceled(true);
-		debug("Monster Spawner!");
+		logger.debug("Monster Spawner!");
 		TileEntityMobSpawner lEntityMobSpawner = (TileEntityMobSpawner) tile;
 		NBTTagCompound tileData = new NBTTagCompound();
 		tileData = lEntityMobSpawner.getSpawnerBaseLogic().writeToNBT(tileData);
-		debug("tile data: " + tileData);
+		logger.debug("tile data: " + tileData);
 		int meta = block.getMetaFromState(e.getState());
-		debug("meta: " + meta);
+		logger.debug("meta: " + meta);
 
 		if(meta < 0)
 		{
-			debug("meta reduced to 0");
+			logger.debug("meta reduced to 0");
 			meta = 0;
 		}
 
@@ -300,13 +264,5 @@ public class Main {
 		world.setBlockToAir(pos);
 		stack.setTagInfo("BlockEntityTag", tileData);
 		BlockUtil.blockDrop(world, pos, stack);
-	}
-
-	private void debug(Object object)
-	{
-		if (canDebug)
-		{
-			logger.debug(object);
-		}
 	}
 }
