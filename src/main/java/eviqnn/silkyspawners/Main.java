@@ -36,7 +36,7 @@ public class Main {
 	public static Logger logger;
 
 	@EventHandler
-	public static void PreInit(FMLPreInitializationEvent event)
+	public static void preInit(FMLPreInitializationEvent event)
 	{
 		logger = event.getModLog();
 	}
@@ -48,15 +48,63 @@ public class Main {
 	}
 
 	@EventHandler
-	public static void Postinit(FMLPostInitializationEvent event)
+	public static void postinit(FMLPostInitializationEvent event)
 	{
 		logger.info("SilkySpawners has loaded with no errors.");
 	}
 
-	@SubscribeEvent
-    public void BlockDrop(BlockEvent.BreakEvent e)
-    {
+	private boolean checkValid(Block block, EntityPlayer player, World world, BlockPos pos, TileEntity tile, EnumHand hand, ItemStack item)
+	{
+		boolean result = true;
+		if (block == null)
+		{
+			logger.error("Block is null");
+			result = false;
+		}
 
+		if (world == null)
+		{
+			logger.error("World is null");
+			result = false;
+		}
+
+		if (pos == null)
+		{
+			logger.error("Position is null");
+			result = false;
+		}
+
+		if (player == null)
+		{
+			logger.error("Player is null");
+			result = false;
+		}
+
+		if(hand == null)
+		{
+			logger.error("Active hand is null");
+			result = false;
+		}
+
+		if(item == null)
+		{
+			logger.error("Held item is null");
+			result = false;
+		}
+
+		if(tile == null)
+		{
+			logger.debug("Tile entity is null");
+			result = false;
+		}
+
+
+		return result;
+	}
+
+	@SubscribeEvent
+    public void blockDrop(BlockEvent.BreakEvent e)
+    {
 		// Code Cleanup
 		Block block = e.getState().getBlock();
 		EntityPlayer player = e.getPlayer();
@@ -66,53 +114,18 @@ public class Main {
 		EnumHand hand = player.getActiveHand();
 		ItemStack item = player.getHeldItem(hand);
 
-		if (block == null)
+		if (!checkValid(block, player, world, pos, tile, hand, item))
 		{
-			logger.error("Block is null");
+			logger.debug("Invalid parameters!");
 			return;
 		}
 
-		if (world == null)
-		{
-			logger.error("World is null");
-			return;
-		}
-
-		if (pos == null)
-		{
-			logger.error("Position is null");
-			return;
-		}
-
-		if (player == null)
-		{
-			logger.error("Player is null");
-			return;
-		}
-
-    	if(hand == null)
+	    if (world.isRemote)
 	    {
-		    logger.error("Active hand is null");
+		    // Disabled as it had spammed debug console on client
+		    //logger.debug("World is remote");
 		    return;
 	    }
-
-    	if(item == null)
-	    {
-		    logger.error("Held item is null");
-		    return;
-	    }
-
-    	if(tile == null)
-	    {
-		    logger.debug("Tile entity is null");
-		    return;
-	    }
-
-		if (world.isRemote)
-		{
-			logger.debug("World is remote");
-			return;
-		}
 
     	if(!world.getGameRules().getBoolean("doTileDrops"))
 	    {
@@ -132,25 +145,30 @@ public class Main {
 
     	if(block instanceof BlockMobSpawner || tile instanceof TileEntityMobSpawner)
     	{
-		    e.setCanceled(true);
-		    logger.debug("Monster Spawner!");
-		    TileEntityMobSpawner lEntityMobSpawner = (TileEntityMobSpawner) tile;
-		    NBTTagCompound tileData = new NBTTagCompound();
-		    tileData = lEntityMobSpawner.getSpawnerBaseLogic().writeToNBT(tileData);
-		    logger.debug("tile data: " + tileData);
-    		int meta = block.getMetaFromState(e.getState());
-    		logger.debug("meta: " + meta);
-
-    		if(meta < 0)
-		    {
-			    logger.debug("meta reduced to 0");
-			    meta = 0;
-		    }
-				
-    		ItemStack stack = new ItemStack(block,1, meta);
-    		world.setBlockToAir(pos);
-    		stack.setTagInfo("BlockEntityTag", tileData);
-		    BlockUtil.BlockDrop(world, pos, stack);
+		    breakSpawner(block, player, world, pos, tile, hand, item, e);
     	}
     }
+
+	private void breakSpawner(Block block, EntityPlayer player, World world, BlockPos pos, TileEntity tile, EnumHand hand, ItemStack item, BlockEvent.BreakEvent e)
+	{
+		e.setCanceled(true);
+		logger.debug("Monster Spawner!");
+		TileEntityMobSpawner lEntityMobSpawner = (TileEntityMobSpawner) tile;
+		NBTTagCompound tileData = new NBTTagCompound();
+		tileData = lEntityMobSpawner.getSpawnerBaseLogic().writeToNBT(tileData);
+		logger.debug("tile data: " + tileData);
+		int meta = block.getMetaFromState(e.getState());
+		logger.debug("meta: " + meta);
+
+		if(meta < 0)
+		{
+			logger.debug("meta reduced to 0");
+			meta = 0;
+		}
+
+		ItemStack stack = new ItemStack(block,1, meta);
+		world.setBlockToAir(pos);
+		stack.setTagInfo("BlockEntityTag", tileData);
+		BlockUtil.BlockDrop(world, pos, stack);
+	}
 }
