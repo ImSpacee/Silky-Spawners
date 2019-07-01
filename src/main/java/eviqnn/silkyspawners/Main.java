@@ -1,8 +1,7 @@
-package com.eviqnn.silkyspawners;
+package eviqnn.silkyspawners;
 
-import com.eviqnn.silkyspawners.proxy.CommonProxy;
-import com.eviqnn.silkyspawners.util.BlockUtil;
-import com.eviqnn.silkyspawners.util.References;
+import eviqnn.silkyspawners.util.BlockUtil;
+import eviqnn.silkyspawners.util.References;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockMobSpawner;
@@ -21,7 +20,6 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -37,9 +35,6 @@ public class Main {
 
 	public static Logger logger;
 
-	@SidedProxy(clientSide = References.CLIENT_PROXY_CLASS, serverSide = References.COMMON_PROXY_CLASS)
-	public static CommonProxy proxy;
-
 	@EventHandler
 	public static void PreInit(FMLPreInitializationEvent event)
 	{
@@ -49,14 +44,13 @@ public class Main {
 	@EventHandler
 	public static void init(FMLInitializationEvent event)
 	{
-		MinecraftForge.EVENT_BUS.register(new Main());
-		System.out.println("SilkySpawners has loaded with no errors.");
+		MinecraftForge.EVENT_BUS.register(instance);
 	}
 
 	@EventHandler
 	public static void Postinit(FMLPostInitializationEvent event)
 	{
-
+		logger.info("SilkySpawners has loaded with no errors.");
 	}
 
 	@SubscribeEvent
