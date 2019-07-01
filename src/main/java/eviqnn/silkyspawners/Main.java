@@ -45,9 +45,7 @@ public class Main {
 	@EventHandler
 	public static void preInit(FMLPreInitializationEvent event)
 	{
-		Debug.config = event.getSuggestedConfigurationFile();
 		logger = event.getModLog();
-		Debug.readProperties();
 	}
 
 	@EventHandler
@@ -76,21 +74,23 @@ public class Main {
 
 		if (!checkValid(block, player, world, pos, tile, hand, item))
 		{
-			Debug.debug("Invalid parameters!");
+			// Debug purposes only
+			// Debug.debug("Invalid parameters!");
 			return;
 		}
 
 		if (world.isRemote)
 		{
-			// Disabled as it had spammed debug console on client
-			Debug.debug("World is remote");
+			// Debug purposes only
+			// Spams debug console on client
+			// Debug.debug("World is remote");
 			return;
 		}
 
 		if(!world.getGameRules().getBoolean("doTileDrops"))
 		{
-			// Disabled as it had spammed debug console
-			Debug.debug("DoTileDrops is off");
+			// Debug purposes only
+			// Spams debug console
 			// Debug.debug("DoTileDrops is off");
 			return;
 		}
@@ -100,7 +100,6 @@ public class Main {
 		if(EnchantmentHelper.getEnchantmentLevel(SILKTOUCH, player.getHeldItem(hand)) <= 0
 				||  toollevel < BlockUtil.pickaxeLevel(e.getState()) )
 		{
-			Debug.debug("Not valid tool");
 			return;
 		}
 
@@ -113,85 +112,70 @@ public class Main {
 	@SubscribeEvent
 	public void blockPlace(BlockEvent.EntityPlaceEvent e)
 	{
-		IBlockState lState = e.getPlacedBlock();
-		Debug.debug("State: " + lState);
-
-		Entity lEntity = e.getEntity();
-		Debug.debug("Entity: " + lEntity);
-
-		BlockPos lBlockPos = e.getPos();
-		Debug.debug("BlockPos: " + lBlockPos);
-
-		World world = lEntity.getEntityWorld();
-		Debug.debug("World: " + world);
-
-		if (world == null)
-		{
-			return;
-		}
+		IBlockState state = e.getPlacedBlock();
+		Entity entity = e.getEntity();
+		BlockPos blockPos = e.getPos();
+		World world = entity.getEntityWorld();
+		TileEntity tile = world.getTileEntity(blockPos);
 
 		EnumHand hand;
 		ItemStack item;
-		if (lEntity instanceof EntityLiving)
+
+		// Debug purposes only
+		// Debug.debug("Blockstate: " + state + "\nEntity: " + entity + "\nBlockPos: " + blockPos + "\nWorld: " + world + "\nTileEntity: " + tile);
+
+		if (entity instanceof EntityLiving)
 		{
-			hand = ((EntityLiving) lEntity).getActiveHand();
-			item = ((EntityLiving) lEntity).getHeldItem(hand);
-		}
-		else if (lEntity instanceof EntityPlayer)
-		{
-			hand = ((EntityPlayer) lEntity).getActiveHand();
-			item = ((EntityPlayer) lEntity).getHeldItem(hand);
-		}
-		else
-		{
+			hand = ((EntityLiving) entity).getActiveHand();
+			item = ((EntityLiving) entity).getHeldItem(hand);
+		} else {
 			return;
 		}
 
-		Debug.debug("Hand: " + hand);
+		// Debug purposes only
+		// Debug.debug("hand: " + hand + "\nItemStack: " + item);
+		// Debug.debug(Blocks.MOB_SPAWNER.getLocalizedName() + state.getBlock().getLocalizedName());
 
-		Debug.debug("Item: " + item);
-
-		TileEntity lTileEntity = world.getTileEntity(lBlockPos);
-		Debug.debug("Tile Entity: " + lTileEntity);
-
-		Debug.debug(Blocks.MOB_SPAWNER.getLocalizedName());
-		Debug.debug(lState.getBlock().getLocalizedName());
-
-		if (Objects.equals(Blocks.MOB_SPAWNER.getRegistryName(), lState.getBlock().getRegistryName()))
+		if (Objects.equals(Blocks.MOB_SPAWNER.getRegistryName(), state.getBlock().getRegistryName()))
 		{
-			if (lTileEntity instanceof TileEntityMobSpawner)
+			if (tile instanceof TileEntityMobSpawner)
 			{
-				TileEntityMobSpawner lTileEntityMobSpawner = (TileEntityMobSpawner) lTileEntity;
-				Debug.debug("Tile Entity Mob Spawner: " + lTileEntityMobSpawner);
-
+				TileEntityMobSpawner TileEntityMobSpawner = (TileEntityMobSpawner) tile;
 				NBTTagCompound nbtBlock = item.getSubCompound("BlockEntityTag");
-				Debug.debug("NBTItem: " + nbtBlock);
+
+				// Debug purposes only
+				// Debug.debug("NBTItem: " + nbtBlock + "\nTile Entity Mob Spawner: " + TileEntityMobSpawner);
 
 				if (nbtBlock != null)
 				{
 					NBTTagCompound nbtTileEntityNew = new NBTTagCompound();
-					Debug.debug("NBTNew (1): " + nbtTileEntityNew);
+					// Debug purposes only
+					// Debug.debug("NBTNew (1): " + nbtTileEntityNew);
 
-					nbtTileEntityNew = lTileEntityMobSpawner.writeToNBT(nbtTileEntityNew);
-					Debug.debug("NBTNew (2): " + nbtTileEntityNew);
+					nbtTileEntityNew = TileEntityMobSpawner.writeToNBT(nbtTileEntityNew);
+					// Debug purposes only
+					// Debug.debug("NBTNew (2): " + nbtTileEntityNew);
 
 					NBTTagCompound nbtTileEntityOld = nbtTileEntityNew.copy();
-					Debug.debug("NBTOld: " + nbtTileEntityNew);
+					// Debug purposes only
+					// Debug.debug("NBTOld: " + nbtTileEntityNew);
 
 					nbtTileEntityNew.merge(nbtBlock);
-					Debug.debug("NBTNew (3): " + nbtTileEntityNew);
+					// Debug purposes only
+					// Debug.debug("NBTNew (3): " + nbtTileEntityNew);
 
-					nbtTileEntityNew.setInteger("x", lBlockPos.getX());
-					nbtTileEntityNew.setInteger("y", lBlockPos.getY());
-					nbtTileEntityNew.setInteger("z", lBlockPos.getZ());
-
-					Debug.debug("NBTNew (4): " + nbtTileEntityNew);
+					nbtTileEntityNew.setInteger("x", blockPos.getX());
+					nbtTileEntityNew.setInteger("y", blockPos.getY());
+					nbtTileEntityNew.setInteger("z", blockPos.getZ());
+					// Debug purposes only
+					// Debug.debug("NBTNew (4): " + nbtTileEntityNew);
 
 					if (!nbtTileEntityNew.equals(nbtTileEntityOld))
 					{
-						Debug.debug("NBTNew (5): " + nbtTileEntityNew);
-						lTileEntity.readFromNBT(nbtTileEntityNew);
-						lTileEntity.markDirty();
+						// Debug purposes only
+						// Debug.debug("NBTNew (5): " + nbtTileEntityNew);
+						tile.readFromNBT(nbtTileEntityNew);
+						tile.markDirty();
 					}
 				}
 			}
@@ -201,6 +185,13 @@ public class Main {
 	private boolean checkValid(Block block, EntityPlayer player, World world, BlockPos pos, TileEntity tile, EnumHand hand, ItemStack item)
 	{
 		boolean result = true;
+
+		if(tile == null)
+		{
+			Debug.debug("Tile entity is null");
+			result = false;
+		}
+
 		if (block == null)
 		{
 			logger.error("Block is null");
@@ -236,13 +227,6 @@ public class Main {
 			logger.error("Held item is null");
 			result = false;
 		}
-
-		if(tile == null)
-		{
-			Debug.debug("Tile entity is null");
-			result = false;
-		}
-
 
 		return result;
 	}
