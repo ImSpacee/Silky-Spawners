@@ -56,7 +56,7 @@ public class Main {
 	@SubscribeEvent
     public void BlockDrop(BlockEvent.BreakEvent e)
     {
-		
+
 		// Code Cleanup
 		Block block = e.getState().getBlock();
 		EntityPlayer player = e.getPlayer();
@@ -65,62 +65,62 @@ public class Main {
 		TileEntity tile = world.getTileEntity(pos);
 		EnumHand hand = player.getActiveHand();
 		ItemStack item = player.getHeldItem(hand);
-		
+
 		if (block == null)
 		{
 			logger.error("Block is null");
 			return;
 		}
-		
+
 		if (world == null)
 		{
 			logger.error("World is null");
 			return;
 		}
-		
+
 		if (pos == null)
 		{
 			logger.error("Position is null");
 			return;
 		}
-		
+
 		if (player == null)
 		{
 			logger.error("Player is null");
 			return;
 		}
-	    
+
     	if(hand == null)
 	    {
 		    logger.error("Active hand is null");
 		    return;
 	    }
-    	
+
     	if(item == null)
 	    {
 		    logger.error("Held item is null");
 		    return;
 	    }
-    	
+
     	if(tile == null)
 	    {
 		    logger.debug("Tile entity is null");
 		    return;
 	    }
-    	
+
 		if (world.isRemote)
 		{
 			logger.debug("World is remote");
 			return;
 		}
-		
+
     	if(!world.getGameRules().getBoolean("doTileDrops"))
 	    {
     		// Disabled as it had spammed debug console
 		    // logger.debug("DoTileDrops is off");
 	    	return;
 	    }
-    	
+
     	int toollevel = item.getItem().getHarvestLevel(item, "pickaxe", player, e.getState());
     	Enchantment SILKTOUCH = Enchantment.getEnchantmentByLocation("minecraft:silk_touch");
     	if(EnchantmentHelper.getEnchantmentLevel(SILKTOUCH, player.getHeldItem(hand)) <= 0
@@ -140,11 +140,13 @@ public class Main {
 		    logger.debug("tile data: " + tileData);
     		int meta = block.getMetaFromState(e.getState());
     		logger.debug("meta: " + meta);
+
     		if(meta < 0)
 		    {
 			    logger.debug("meta reduced to 0");
 			    meta = 0;
 		    }
+				
     		ItemStack stack = new ItemStack(block,1, meta);
     		world.setBlockToAir(pos);
     		stack.setTagInfo("BlockEntityTag", tileData);
