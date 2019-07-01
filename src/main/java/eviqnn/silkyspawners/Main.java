@@ -145,11 +145,11 @@ public class Main {
 
     	if(block instanceof BlockMobSpawner || tile instanceof TileEntityMobSpawner)
     	{
-		    breakSpawner(block, player, world, pos, tile, hand, item, e);
+		    breakSpawner(block, world, pos, tile, e);
     	}
     }
 
-	private void breakSpawner(Block block, EntityPlayer player, World world, BlockPos pos, TileEntity tile, EnumHand hand, ItemStack item, BlockEvent.BreakEvent e)
+	private void breakSpawner(Block block, World world, BlockPos pos, TileEntity tile, BlockEvent.BreakEvent e)
 	{
 		e.setCanceled(true);
 		logger.debug("Monster Spawner!");
