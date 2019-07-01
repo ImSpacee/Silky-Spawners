@@ -1,4 +1,4 @@
-package eviqnn.silkyspawners.util;
+package ml.crypthub.silkyspawners.util;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
