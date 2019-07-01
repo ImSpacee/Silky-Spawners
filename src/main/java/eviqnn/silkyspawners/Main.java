@@ -73,23 +73,20 @@ public class Main {
 
 		if (!checkValid(block, player, world, pos, tile, hand, item))
 		{
-			// Debug purposes only
-			// logger.debug("Invalid parameters!");
+			logger.debug("Invalid parameters!");
 			return;
 		}
 
 		if (world.isRemote)
 		{
-			// Debug purposes only
-			// Spams debug console on client
-			// logger.debug("World is remote");
+			// Disabled as it had spammed debug console on client
+			//logger.debug("World is remote");
 			return;
 		}
 
 		if(!world.getGameRules().getBoolean("doTileDrops"))
 		{
-			// Debug purposes only
-			// Spams debug console
+			// Disabled as it had spammed debug console
 			// logger.debug("DoTileDrops is off");
 			return;
 		}
@@ -99,6 +96,7 @@ public class Main {
 		if(EnchantmentHelper.getEnchantmentLevel(SILKTOUCH, player.getHeldItem(hand)) <= 0
 				||  toollevel < BlockUtil.pickaxeLevel(e.getState()) )
 		{
+			logger.debug("Not valid tool");
 			return;
 		}
 
@@ -111,70 +109,85 @@ public class Main {
 	@SubscribeEvent
 	public void blockPlace(BlockEvent.EntityPlaceEvent e)
 	{
-		IBlockState state = e.getPlacedBlock();
-		Entity entity = e.getEntity();
-		BlockPos blockPos = e.getPos();
-		World world = entity.getEntityWorld();
-		TileEntity tile = world.getTileEntity(blockPos);
-		
+		IBlockState lState = e.getPlacedBlock();
+		logger.debug("State: " + lState);
+
+		Entity lEntity = e.getEntity();
+		logger.debug("Entity: " + lEntity);
+
+		BlockPos lBlockPos = e.getPos();
+		logger.debug("BlockPos: " + lBlockPos);
+
+		World world = lEntity.getEntityWorld();
+		logger.debug("World: " + world);
+
+		if (world == null)
+		{
+			return;
+		}
+
 		EnumHand hand;
 		ItemStack item;
-		
-		// Debug purposes only
-		// logger.debug("Blockstate: " + state + "\nEntity: " + entity + "\nBlockPos: " + blockPos + "\nWorld: " + world + "\nTileEntity: " + tile);
-		
-		if (entity instanceof EntityLiving)
+		if (lEntity instanceof EntityLiving)
 		{
-			hand = ((EntityLiving) entity).getActiveHand();
-			item = ((EntityLiving) entity).getHeldItem(hand);
-		} else { 
-			return; 
+			hand = ((EntityLiving) lEntity).getActiveHand();
+			item = ((EntityLiving) lEntity).getHeldItem(hand);
 		}
-		
-		// Debug purposes only
-		// logger.debug("hand: " + hand + "\nItemStack: " + item);
-		// logger.debug(Blocks.MOB_SPAWNER.getLocalizedName() + state.getBlock().getLocalizedName());
-
-		if (Objects.equals(Blocks.MOB_SPAWNER.getRegistryName(), state.getBlock().getRegistryName()))
+		else if (lEntity instanceof EntityPlayer)
 		{
-			if (tile instanceof TileEntityMobSpawner)
+			hand = ((EntityPlayer) lEntity).getActiveHand();
+			item = ((EntityPlayer) lEntity).getHeldItem(hand);
+		}
+		else
+		{
+			return;
+		}
+
+		logger.debug("Hand: " + hand);
+
+		logger.debug("Item: " + item);
+
+		TileEntity lTileEntity = world.getTileEntity(lBlockPos);
+		logger.debug("Tile Entity: " + lTileEntity);
+
+		logger.debug(Blocks.MOB_SPAWNER.getLocalizedName());
+		logger.debug(lState.getBlock().getLocalizedName());
+
+		if (Objects.equals(Blocks.MOB_SPAWNER.getRegistryName(), lState.getBlock().getRegistryName()))
+		{
+			if (lTileEntity instanceof TileEntityMobSpawner)
 			{
-				TileEntityMobSpawner TileEntityMobSpawner = (TileEntityMobSpawner) tile;
+				TileEntityMobSpawner lTileEntityMobSpawner = (TileEntityMobSpawner) lTileEntity;
+				logger.debug("Tile Entity Mob Spawner: " + lTileEntityMobSpawner);
+
 				NBTTagCompound nbtBlock = item.getSubCompound("BlockEntityTag");
-				
-				// Debug purposes only
-				// logger.debug("NBTItem: " + nbtBlock + "\nTile Entity Mob Spawner: " + TileEntityMobSpawner);
+				logger.debug("NBTItem: " + nbtBlock);
 
 				if (nbtBlock != null)
 				{
 					NBTTagCompound nbtTileEntityNew = new NBTTagCompound();
-					// Debug purposes only
-					// logger.debug("NBTNew (1): " + nbtTileEntityNew);
+					logger.debug("NBTNew (1): " + nbtTileEntityNew);
 
-					nbtTileEntityNew = TileEntityMobSpawner.writeToNBT(nbtTileEntityNew);
-					// Debug purposes only
-					// logger.debug("NBTNew (2): " + nbtTileEntityNew);
+					nbtTileEntityNew = lTileEntityMobSpawner.writeToNBT(nbtTileEntityNew);
+					logger.debug("NBTNew (2): " + nbtTileEntityNew);
 
 					NBTTagCompound nbtTileEntityOld = nbtTileEntityNew.copy();
-					// Debug purposes only
-					// logger.debug("NBTOld: " + nbtTileEntityNew);
+					logger.debug("NBTOld: " + nbtTileEntityNew);
 
 					nbtTileEntityNew.merge(nbtBlock);
-					// Debug purposes only
-					// logger.debug("NBTNew (3): " + nbtTileEntityNew);
+					logger.debug("NBTNew (3): " + nbtTileEntityNew);
 
-					nbtTileEntityNew.setInteger("x", blockPos.getX());
-					nbtTileEntityNew.setInteger("y", blockPos.getY());
-					nbtTileEntityNew.setInteger("z", blockPos.getZ());
-					// Debug purposes only
-					// logger.debug("NBTNew (4): " + nbtTileEntityNew);
+					nbtTileEntityNew.setInteger("x", lBlockPos.getX());
+					nbtTileEntityNew.setInteger("y", lBlockPos.getY());
+					nbtTileEntityNew.setInteger("z", lBlockPos.getZ());
+
+					logger.debug("NBTNew (4): " + nbtTileEntityNew);
 
 					if (!nbtTileEntityNew.equals(nbtTileEntityOld))
 					{
-						// Debug purposes only
-						// logger.debug("NBTNew (5): " + nbtTileEntityNew);
-						tile.readFromNBT(nbtTileEntityNew);
-						tile.markDirty();
+						logger.debug("NBTNew (5): " + nbtTileEntityNew);
+						lTileEntity.readFromNBT(nbtTileEntityNew);
+						lTileEntity.markDirty();
 					}
 				}
 			}
@@ -184,13 +197,6 @@ public class Main {
 	private boolean checkValid(Block block, EntityPlayer player, World world, BlockPos pos, TileEntity tile, EnumHand hand, ItemStack item)
 	{
 		boolean result = true;
-		
-		if(tile == null)
-		{
-			logger.debug("Tile entity is null");
-			result = false;
-		}
-		
 		if (block == null)
 		{
 			logger.error("Block is null");
@@ -226,6 +232,13 @@ public class Main {
 			logger.error("Held item is null");
 			result = false;
 		}
+
+		if(tile == null)
+		{
+			logger.debug("Tile entity is null");
+			result = false;
+		}
+
 
 		return result;
 	}
