@@ -1,15 +1,21 @@
+
 ---
 name: Request a Feature
 about: Request a Feature - Use this to suggest ideas!
-title: "[R]"
-labels: ''
+title: ""
+labels: enhancement
 assignees: ''
 
 ---
 
-*Below is placeholder text, please delete this and then write your idea.*
-Hey there Eviqnn! Can you please add this, that and maybe a bit of this!
+<-
+*Please remove this text!*
+*This text is placeholder and serves no purpose.*
+                                                ->
 
-
-Thanks so much!
-From me!
+<-
+*Hey there!*
+*Please may you add a way to request a feature?*
+*Thank you!*
+*- Me*
+                                                ->
