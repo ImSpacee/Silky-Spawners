@@ -27,7 +27,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.Logger;
 
 
-@Mod(modid = References.MOD_ID, name = References.NAME, version = References.VERSION)
+@Mod(modid = References.MOD_ID, name = References.NAME, version = References.VERSION, acceptableRemoteVersions = "*")
 public class Main {
 
 	@Instance
@@ -148,7 +148,7 @@ public class Main {
     		ItemStack stack = new ItemStack(block,1, meta);
     		world.setBlockToAir(pos);
     		stack.setTagInfo("BlockEntityTag", tileData);
-		    BlockUtil.BlockDrop(world,pos,stack);
+		    BlockUtil.BlockDrop(world, pos, stack);
     	}
     }
 }
