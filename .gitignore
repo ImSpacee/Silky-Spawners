@@ -23,11 +23,11 @@ run
 CREDITS.txt
 forge-1.12.2-14.23.5.2838-changelog.txt
 gradle.properties
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
 gradlew
 gradlew.bat
 LICENSE-Paulscode IBXM Library.txt
 LICENSE-Paulscode SoundSystem CodecIBXM.txt
 LICENSE.txt
 README.txt
-gradle/wrapper/gradle-wrapper.properties
-gradle/wrapper/gradle-wrapper.jar

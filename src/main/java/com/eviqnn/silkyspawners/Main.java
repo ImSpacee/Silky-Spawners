@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -25,7 +26,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
+import org.apache.logging.log4j.Logger;
 
 
 @Mod(modid = References.MOD_ID, name = References.NAME, version = References.VERSION)
@@ -33,6 +34,8 @@ public class Main {
 	
 	@Instance
 	public static Main instance;
+
+	public static Logger logger;
 	
 	@SidedProxy(clientSide = References.CLIENT_PROXY_CLASS, serverSide = References.COMMON_PROXY_CLASS)
 	public static CommonProxy proxy;
@@ -40,7 +43,7 @@ public class Main {
 	@EventHandler
 	public static void PreInit(FMLPreInitializationEvent event)
 	{
-		
+		logger = event.getModLog();
 	}
 	
 	@EventHandler
@@ -64,36 +67,81 @@ public class Main {
 		World world = e.getWorld();
 		BlockPos pos = e.getPos();
 		TileEntity tile = world.getTileEntity(pos);
-    	if(block == null || world == null || pos == null || world.isRemote || player == null || !world.getGameRules().getBoolean("doTileDrops"))
-    		return;
-    	if(player.getActiveHand() == null)
-    		return;
-    	if(player.getHeldItem(player.getActiveHand()) == null)
-    		return;
-    	if(tile == null)
+		if (block == null)
+		{
+			logger.error("Block is null");
 			return;
-    	int toollevel = player.getHeldItem(player.getActiveHand()).getItem().getHarvestLevel(player.getHeldItem(player.getActiveHand()), "pickaxe",player,e.getState());
-    	if(player.getHeldItem(player.getActiveHand()) == null || EnchantmentHelper.getEnchantmentLevel(Enchantment.getEnchantmentByLocation("minecraft:silk_touch"), player.getHeldItem(player.getActiveHand())) <= 0 ||  toollevel < BlockUtil.PickaxeLevel(e.getState()) )
-    		return;
+		}
+		if (world == null)
+		{
+			logger.error("World is null");
+			return;
+		}
+		if (pos == null)
+		{
+			logger.error("Position is null");
+			return;
+		}
+		if (player == null)
+		{
+			logger.error("Player is null");
+			return;
+		}
+	    EnumHand hand = player.getActiveHand();
+    	if(hand == null)
+	    {
+		    logger.error("Active hand is null");
+		    return;
+	    }
+    	ItemStack item = player.getHeldItem(hand);
+    	if(item == null)
+	    {
+		    logger.error("Held item is null");
+		    return;
+	    }
+    	if(tile == null)
+	    {
+		    logger.debug("Tile entity is null");
+		    return;
+	    }
+		if (world.isRemote)
+		{
+			logger.debug("World is remote");
+			return;
+		}
+    	if(!world.getGameRules().getBoolean("doTileDrops"))
+	    {
+		    //logger.debug("DoTileDrops is off");
+	    	return;
+	    }
+    	int toollevel = item.getItem().getHarvestLevel(item, "pickaxe", player, e.getState());
+    	Enchantment SILKTOUCH = Enchantment.getEnchantmentByLocation("minecraft:silk_touch");
+    	if(EnchantmentHelper.getEnchantmentLevel(SILKTOUCH, player.getHeldItem(hand)) <= 0
+			    ||  toollevel < BlockUtil.PickaxeLevel(e.getState()) )
+	    {
+	    	logger.debug("Not valid tool");
+	    	return;
+	    }
 
     	if(block instanceof BlockMobSpawner || tile instanceof TileEntityMobSpawner)
     	{
+		    logger.debug("Monster Spawner!");
+		    TileEntityMobSpawner lEntityMobSpawner = (TileEntityMobSpawner) tile;
+		    NBTTagCompound tileData = new NBTTagCompound();
+		    tileData = lEntityMobSpawner.getSpawnerBaseLogic().writeToNBT(tileData);
+		    logger.debug(tileData);
     		int meta = block.getMetaFromState(e.getState());
+    		logger.debug("meta: " + meta);
     		if(meta < 0)
-    			meta = 0;
-    		ItemStack stack = new ItemStack(block,1,meta);
-    		BlockUtil.BlockDrop(world,pos,stack);
+		    {
+			    logger.debug("meta reduced to 0");
+			    meta = 0;
+		    }
+    		ItemStack stack = new ItemStack(block,1, meta);
     		world.setBlockToAir(pos);
-    		NBTTagCompound nbt = new NBTTagCompound();
-    		setSpawnID(stack,world,tile,nbt);
+    		stack.setTagInfo("BlockEntityTag", tileData);
+		    BlockUtil.BlockDrop(world,pos,stack);
     		e.setCanceled(true);
     	}
     }
-	
-	public void setSpawnID(ItemStack stack, World world, TileEntity tile, NBTTagCompound nbt)
-	{
-		NBTTagCompound data = nbt.getCompoundTag("SpawnData");
-		String name = data.getString("id");
-		nbt.setString("SpawnData", name);
-	}
 }
