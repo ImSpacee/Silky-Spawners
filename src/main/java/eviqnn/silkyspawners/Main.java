@@ -91,6 +91,7 @@ public class Main {
 		{
 			// Disabled as it had spammed debug console
 			Debug.debug("DoTileDrops is off");
+			// Debug.debug("DoTileDrops is off");
 			return;
 		}
 
