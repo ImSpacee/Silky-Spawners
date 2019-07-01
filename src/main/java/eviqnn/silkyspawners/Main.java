@@ -1,6 +1,7 @@
 package eviqnn.silkyspawners;
 
 import eviqnn.silkyspawners.util.BlockUtil;
+import eviqnn.silkyspawners.util.Debug;
 import eviqnn.silkyspawners.util.References;
 
 import net.minecraft.block.Block;
@@ -44,7 +45,9 @@ public class Main {
 	@EventHandler
 	public static void preInit(FMLPreInitializationEvent event)
 	{
+		Debug.config = event.getSuggestedConfigurationFile();
 		logger = event.getModLog();
+		Debug.readProperties();
 	}
 
 	@EventHandler
@@ -73,21 +76,21 @@ public class Main {
 
 		if (!checkValid(block, player, world, pos, tile, hand, item))
 		{
-			logger.debug("Invalid parameters!");
+			Debug.debug("Invalid parameters!");
 			return;
 		}
 
 		if (world.isRemote)
 		{
 			// Disabled as it had spammed debug console on client
-			//logger.debug("World is remote");
+			Debug.debug("World is remote");
 			return;
 		}
 
 		if(!world.getGameRules().getBoolean("doTileDrops"))
 		{
 			// Disabled as it had spammed debug console
-			// logger.debug("DoTileDrops is off");
+			Debug.debug("DoTileDrops is off");
 			return;
 		}
 
@@ -96,7 +99,7 @@ public class Main {
 		if(EnchantmentHelper.getEnchantmentLevel(SILKTOUCH, player.getHeldItem(hand)) <= 0
 				||  toollevel < BlockUtil.pickaxeLevel(e.getState()) )
 		{
-			logger.debug("Not valid tool");
+			Debug.debug("Not valid tool");
 			return;
 		}
 
@@ -110,16 +113,16 @@ public class Main {
 	public void blockPlace(BlockEvent.EntityPlaceEvent e)
 	{
 		IBlockState lState = e.getPlacedBlock();
-		logger.debug("State: " + lState);
+		Debug.debug("State: " + lState);
 
 		Entity lEntity = e.getEntity();
-		logger.debug("Entity: " + lEntity);
+		Debug.debug("Entity: " + lEntity);
 
 		BlockPos lBlockPos = e.getPos();
-		logger.debug("BlockPos: " + lBlockPos);
+		Debug.debug("BlockPos: " + lBlockPos);
 
 		World world = lEntity.getEntityWorld();
-		logger.debug("World: " + world);
+		Debug.debug("World: " + world);
 
 		if (world == null)
 		{
@@ -143,49 +146,49 @@ public class Main {
 			return;
 		}
 
-		logger.debug("Hand: " + hand);
+		Debug.debug("Hand: " + hand);
 
-		logger.debug("Item: " + item);
+		Debug.debug("Item: " + item);
 
 		TileEntity lTileEntity = world.getTileEntity(lBlockPos);
-		logger.debug("Tile Entity: " + lTileEntity);
+		Debug.debug("Tile Entity: " + lTileEntity);
 
-		logger.debug(Blocks.MOB_SPAWNER.getLocalizedName());
-		logger.debug(lState.getBlock().getLocalizedName());
+		Debug.debug(Blocks.MOB_SPAWNER.getLocalizedName());
+		Debug.debug(lState.getBlock().getLocalizedName());
 
 		if (Objects.equals(Blocks.MOB_SPAWNER.getRegistryName(), lState.getBlock().getRegistryName()))
 		{
 			if (lTileEntity instanceof TileEntityMobSpawner)
 			{
 				TileEntityMobSpawner lTileEntityMobSpawner = (TileEntityMobSpawner) lTileEntity;
-				logger.debug("Tile Entity Mob Spawner: " + lTileEntityMobSpawner);
+				Debug.debug("Tile Entity Mob Spawner: " + lTileEntityMobSpawner);
 
 				NBTTagCompound nbtBlock = item.getSubCompound("BlockEntityTag");
-				logger.debug("NBTItem: " + nbtBlock);
+				Debug.debug("NBTItem: " + nbtBlock);
 
 				if (nbtBlock != null)
 				{
 					NBTTagCompound nbtTileEntityNew = new NBTTagCompound();
-					logger.debug("NBTNew (1): " + nbtTileEntityNew);
+					Debug.debug("NBTNew (1): " + nbtTileEntityNew);
 
 					nbtTileEntityNew = lTileEntityMobSpawner.writeToNBT(nbtTileEntityNew);
-					logger.debug("NBTNew (2): " + nbtTileEntityNew);
+					Debug.debug("NBTNew (2): " + nbtTileEntityNew);
 
 					NBTTagCompound nbtTileEntityOld = nbtTileEntityNew.copy();
-					logger.debug("NBTOld: " + nbtTileEntityNew);
+					Debug.debug("NBTOld: " + nbtTileEntityNew);
 
 					nbtTileEntityNew.merge(nbtBlock);
-					logger.debug("NBTNew (3): " + nbtTileEntityNew);
+					Debug.debug("NBTNew (3): " + nbtTileEntityNew);
 
 					nbtTileEntityNew.setInteger("x", lBlockPos.getX());
 					nbtTileEntityNew.setInteger("y", lBlockPos.getY());
 					nbtTileEntityNew.setInteger("z", lBlockPos.getZ());
 
-					logger.debug("NBTNew (4): " + nbtTileEntityNew);
+					Debug.debug("NBTNew (4): " + nbtTileEntityNew);
 
 					if (!nbtTileEntityNew.equals(nbtTileEntityOld))
 					{
-						logger.debug("NBTNew (5): " + nbtTileEntityNew);
+						Debug.debug("NBTNew (5): " + nbtTileEntityNew);
 						lTileEntity.readFromNBT(nbtTileEntityNew);
 						lTileEntity.markDirty();
 					}
@@ -235,7 +238,7 @@ public class Main {
 
 		if(tile == null)
 		{
-			logger.debug("Tile entity is null");
+			Debug.debug("Tile entity is null");
 			result = false;
 		}
 
@@ -246,17 +249,17 @@ public class Main {
 	private void breakSpawner(Block block, World world, BlockPos pos, TileEntity tile, BlockEvent.BreakEvent e)
 	{
 		e.setCanceled(true);
-		logger.debug("Monster Spawner!");
+		Debug.debug("Monster Spawner!");
 		TileEntityMobSpawner lEntityMobSpawner = (TileEntityMobSpawner) tile;
 		NBTTagCompound tileData = new NBTTagCompound();
 		tileData = lEntityMobSpawner.getSpawnerBaseLogic().writeToNBT(tileData);
-		logger.debug("tile data: " + tileData);
+		Debug.debug("tile data: " + tileData);
 		int meta = block.getMetaFromState(e.getState());
-		logger.debug("meta: " + meta);
+		Debug.debug("meta: " + meta);
 
 		if(meta < 0)
 		{
-			logger.debug("meta reduced to 0");
+			Debug.debug("meta reduced to 0");
 			meta = 0;
 		}
 
