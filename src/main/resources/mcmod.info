@@ -9,7 +9,7 @@
   "updateUrl": "",
   "authorList": ["0xEviqnn_", "Codetoil"],
   "credits": "Forge & FML",
-  "logoFile": "",
+  "logoFile": "logo.png",
   "screenshots": [],
   "dependencies": []
 }

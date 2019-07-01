@@ -56,58 +56,71 @@ public class Main {
 	@SubscribeEvent
     public void BlockDrop(BlockEvent.BreakEvent e)
     {
+		
+		// Code Cleanup
 		Block block = e.getState().getBlock();
 		EntityPlayer player = e.getPlayer();
 		World world = e.getWorld();
 		BlockPos pos = e.getPos();
 		TileEntity tile = world.getTileEntity(pos);
+		EnumHand hand = player.getActiveHand();
+		ItemStack item = player.getHeldItem(hand);
+		
 		if (block == null)
 		{
 			logger.error("Block is null");
 			return;
 		}
+		
 		if (world == null)
 		{
 			logger.error("World is null");
 			return;
 		}
+		
 		if (pos == null)
 		{
 			logger.error("Position is null");
 			return;
 		}
+		
 		if (player == null)
 		{
 			logger.error("Player is null");
 			return;
 		}
-	    EnumHand hand = player.getActiveHand();
+	    
     	if(hand == null)
 	    {
 		    logger.error("Active hand is null");
 		    return;
 	    }
-    	ItemStack item = player.getHeldItem(hand);
+    	
     	if(item == null)
 	    {
 		    logger.error("Held item is null");
 		    return;
 	    }
+    	
     	if(tile == null)
 	    {
 		    logger.debug("Tile entity is null");
 		    return;
 	    }
+    	
 		if (world.isRemote)
 		{
 			logger.debug("World is remote");
 			return;
 		}
+		
     	if(!world.getGameRules().getBoolean("doTileDrops"))
 	    {
-		    //logger.debug("DoTileDrops is off");
+    		// Disabled as it had spammed debug console
+		    // logger.debug("DoTileDrops is off");
 	    	return;
 	    }
+    	
     	int toollevel = item.getItem().getHarvestLevel(item, "pickaxe", player, e.getState());
     	Enchantment SILKTOUCH = Enchantment.getEnchantmentByLocation("minecraft:silk_touch");
     	if(EnchantmentHelper.getEnchantmentLevel(SILKTOUCH, player.getHeldItem(hand)) <= 0
