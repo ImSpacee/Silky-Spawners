@@ -119,11 +119,12 @@ public class Main {
 
     	if(block instanceof BlockMobSpawner || tile instanceof TileEntityMobSpawner)
     	{
+		    e.setCanceled(true);
 		    logger.debug("Monster Spawner!");
 		    TileEntityMobSpawner lEntityMobSpawner = (TileEntityMobSpawner) tile;
 		    NBTTagCompound tileData = new NBTTagCompound();
 		    tileData = lEntityMobSpawner.getSpawnerBaseLogic().writeToNBT(tileData);
-		    logger.debug(tileData);
+		    logger.debug("tile data: " + tileData);
     		int meta = block.getMetaFromState(e.getState());
     		logger.debug("meta: " + meta);
     		if(meta < 0)
@@ -135,7 +136,6 @@ public class Main {
     		world.setBlockToAir(pos);
     		stack.setTagInfo("BlockEntityTag", tileData);
 		    BlockUtil.BlockDrop(world,pos,stack);
-    		e.setCanceled(true);
     	}
     }
 }
