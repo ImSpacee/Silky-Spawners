@@ -26,6 +26,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -48,23 +49,33 @@ public class Main {
 		Debug.config = event.getSuggestedConfigurationFile();
 		logger = event.getModLog();
 		Debug.readProperties();
+		Debug.debug("Pre Initialization!");
 	}
 
 	@EventHandler
 	public static void init(FMLInitializationEvent event)
 	{
 		MinecraftForge.EVENT_BUS.register(instance);
+		Debug.debug("Initialization!");
 	}
 
 	@EventHandler
 	public static void postinit(FMLPostInitializationEvent event)
 	{
+		Debug.debug("Post Initialization!");
+	}
+
+	@EventHandler
+	public static void loadcomplete(FMLLoadCompleteEvent event)
+	{
+		Debug.debug("Load Complete!");
 		logger.info("SilkySpawners has loaded with no errors.");
 	}
 
 	@SubscribeEvent
-	public void blockDrop(BlockEvent.BreakEvent e)
+	public void blockBreak(BlockEvent.BreakEvent e)
 	{
+		Debug.debug("Block Break!");
 		// Code Cleanup
 		Block block = e.getState().getBlock();
 		EntityPlayer player = e.getPlayer();
@@ -77,7 +88,7 @@ public class Main {
 		if (!checkValid(block, player, world, pos, tile, hand, item))
 		{
 			// Debug purposes only
-			// Debug.debug("Invalid parameters!");
+			Debug.debug("Invalid parameters!");
 			return;
 		}
 
@@ -85,7 +96,7 @@ public class Main {
 		{
 			// Debug purposes only
 			// Spams debug console on client
-			// Debug.debug("World is remote");
+			Debug.debug("World is remote");
 			return;
 		}
 
@@ -93,7 +104,7 @@ public class Main {
 		{
 			// Debug purposes only
 			// Spams debug console
-			// Debug.debug("DoTileDrops is off");
+			Debug.debug("DoTileDrops is off");
 			return;
 		}
 
@@ -114,6 +125,7 @@ public class Main {
 	@SubscribeEvent
 	public void blockPlace(BlockEvent.EntityPlaceEvent e)
 	{
+		Debug.debug("Block Place!");
 		IBlockState state = e.getPlacedBlock();
 		Entity entity = e.getEntity();
 		BlockPos blockPos = e.getPos();
@@ -130,6 +142,10 @@ public class Main {
 		{
 			hand = ((EntityLiving) entity).getActiveHand();
 			item = ((EntityLiving) entity).getHeldItem(hand);
+		} else if (entity instanceof EntityPlayer)
+		{
+			hand = ((EntityPlayer) entity).getActiveHand();
+			item = ((EntityPlayer) entity).getHeldItem(hand);
 		} else {
 			return;
 		}
