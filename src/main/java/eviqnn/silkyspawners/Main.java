@@ -137,7 +137,7 @@ public class Main {
     	int toollevel = item.getItem().getHarvestLevel(item, "pickaxe", player, e.getState());
     	Enchantment SILKTOUCH = Enchantment.getEnchantmentByLocation("minecraft:silk_touch");
     	if(EnchantmentHelper.getEnchantmentLevel(SILKTOUCH, player.getHeldItem(hand)) <= 0
-			    ||  toollevel < BlockUtil.PickaxeLevel(e.getState()) )
+			    ||  toollevel < BlockUtil.pickaxeLevel(e.getState()) )
 	    {
 	    	logger.debug("Not valid tool");
 	    	return;
@@ -169,6 +169,6 @@ public class Main {
 		ItemStack stack = new ItemStack(block,1, meta);
 		world.setBlockToAir(pos);
 		stack.setTagInfo("BlockEntityTag", tileData);
-		BlockUtil.BlockDrop(world, pos, stack);
+		BlockUtil.blockDrop(world, pos, stack);
 	}
 }

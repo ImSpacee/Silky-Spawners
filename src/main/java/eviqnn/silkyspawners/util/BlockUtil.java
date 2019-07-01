@@ -1,6 +1,5 @@
 package eviqnn.silkyspawners.util;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
@@ -9,7 +8,7 @@ import net.minecraft.world.World;
 
 public class BlockUtil {
 	
-	public static void BlockDrop(World world, BlockPos pos, ItemStack stack)
+	public static void blockDrop(World world, BlockPos pos, ItemStack stack)
 	{
 		 if (!world.isRemote && world.getGameRules().getBoolean("doTileDrops") && !world.restoringBlockSnapshots)
 	     {
@@ -23,7 +22,7 @@ public class BlockUtil {
 	    }
 	}
 	
-    public static int PickaxeLevel(IBlockState state) 
+    public static int pickaxeLevel(IBlockState state)
     {
     	return state.getBlock().getHarvestLevel(state);
 	}
