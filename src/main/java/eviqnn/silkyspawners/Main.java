@@ -1,7 +1,7 @@
-package ml.crypthub.silkyspawners;
+package eviqnn.silkyspawners;
 
-import ml.crypthub.silkyspawners.util.BlockUtil;
-import ml.crypthub.silkyspawners.util.References;
+import eviqnn.silkyspawners.util.BlockUtil;
+import eviqnn.silkyspawners.util.References;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockMobSpawner;

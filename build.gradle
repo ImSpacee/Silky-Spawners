@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 
 
 version = "1.2"
-group = "ml.crypthub.silkyspawners" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = "eviqnn.silkyspawners" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "silkyspawners"
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.

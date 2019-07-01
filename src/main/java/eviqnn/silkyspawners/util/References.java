@@ -1,4 +1,4 @@
-package ml.crypthub.silkyspawners.util;
+package eviqnn.silkyspawners.util;
 
 public class References {
 
