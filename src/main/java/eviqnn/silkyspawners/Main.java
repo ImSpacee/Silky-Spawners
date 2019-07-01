@@ -45,7 +45,9 @@ public class Main {
 	@EventHandler
 	public static void preInit(FMLPreInitializationEvent event)
 	{
+		Debug.config = event.getSuggestedConfigurationFile();
 		logger = event.getModLog();
+		Debug.readProperties();
 	}
 
 	@EventHandler
