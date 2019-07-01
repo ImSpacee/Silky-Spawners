@@ -115,15 +115,14 @@ public class Main {
 
 		if (world.isRemote)
 		{
-			// Disabled as it had spammed debug console on client
-			//debug("World is remote");
+			debug("World is remote");
 			return;
 		}
 
 		if(!world.getGameRules().getBoolean("doTileDrops"))
 		{
-			// Disabled as it had spammed debug console
-			// debug("DoTileDrops is off");
+			// Spams debug console
+			debug("DoTileDrops is off");
 			return;
 		}
 
@@ -145,66 +144,47 @@ public class Main {
 	@SubscribeEvent
 	public void blockPlace(BlockEvent.EntityPlaceEvent e)
 	{
-		IBlockState lState = e.getPlacedBlock();
-		debug("State: " + lState);
-
-		Entity lEntity = e.getEntity();
-		debug("Entity: " + lEntity);
-
-		BlockPos lBlockPos = e.getPos();
-		debug("BlockPos: " + lBlockPos);
-
-		World world = lEntity.getEntityWorld();
-		debug("World: " + world);
-
-		if (world == null)
-		{
-			return;
-		}
+		IBlockState state = e.getPlacedBlock();
+		Entity entity = e.getEntity();
+		BlockPos blockPos = e.getPos();
+		World world = entity.getEntityWorld();
+		TileEntity tile = world.getTileEntity(blockPos);
 
 		EnumHand hand;
 		ItemStack item;
-		if (lEntity instanceof EntityLiving)
+		
+		// Debug purposes only
+		// logger.debug("Blockstate: " + state + "\nEntity: " + entity + "\nBlockPos: " + blockPos + "\nWorld: " + world + "\nTileEntity: " + tile);
+		
+		if (entity instanceof EntityLiving)
 		{
-			hand = ((EntityLiving) lEntity).getActiveHand();
-			item = ((EntityLiving) lEntity).getHeldItem(hand);
+			hand = ((EntityLiving) entity).getActiveHand();
+			item = ((EntityLiving) entity).getHeldItem(hand);
+		} else { 
+			return; 
 		}
-		else if (lEntity instanceof EntityPlayer)
+		
+		// Debug purposes only
+		// logger.debug("hand: " + hand + "\nItemStack: " + item);
+		// logger.debug(Blocks.MOB_SPAWNER.getLocalizedName() + state.getBlock().getLocalizedName());
+
+
+		if (Objects.equals(Blocks.MOB_SPAWNER.getRegistryName(), state.getBlock().getRegistryName()))
 		{
-			hand = ((EntityPlayer) lEntity).getActiveHand();
-			item = ((EntityPlayer) lEntity).getHeldItem(hand);
-		}
-		else
-		{
-			return;
-		}
-
-		debug("Hand: " + hand);
-
-		debug("Item: " + item);
-
-		TileEntity lTileEntity = world.getTileEntity(lBlockPos);
-		debug("Tile Entity: " + lTileEntity);
-
-		debug(Blocks.MOB_SPAWNER.getLocalizedName());
-		debug(lState.getBlock().getLocalizedName());
-
-		if (Objects.equals(Blocks.MOB_SPAWNER.getRegistryName(), lState.getBlock().getRegistryName()))
-		{
-			if (lTileEntity instanceof TileEntityMobSpawner)
+			if (tile instanceof TileEntityMobSpawner)
 			{
-				TileEntityMobSpawner lTileEntityMobSpawner = (TileEntityMobSpawner) lTileEntity;
-				debug("Tile Entity Mob Spawner: " + lTileEntityMobSpawner);
-
+				TileEntityMobSpawner tileEntityMobSpawner = (TileEntityMobSpawner) tile;
 				NBTTagCompound nbtBlock = item.getSubCompound("BlockEntityTag");
-				debug("NBTItem: " + nbtBlock);
+				
+				// Debug purposes only
+				debug("NBTItem: " + nbtBlock + "\nTile Entity Mob Spawner: " + tileEntityMobSpawner);
 
 				if (nbtBlock != null)
 				{
 					NBTTagCompound nbtTileEntityNew = new NBTTagCompound();
 					debug("NBTNew (1): " + nbtTileEntityNew);
 
-					nbtTileEntityNew = lTileEntityMobSpawner.writeToNBT(nbtTileEntityNew);
+					nbtTileEntityNew = tileEntityMobSpawner.writeToNBT(nbtTileEntityNew);
 					debug("NBTNew (2): " + nbtTileEntityNew);
 
 					NBTTagCompound nbtTileEntityOld = nbtTileEntityNew.copy();
@@ -213,17 +193,17 @@ public class Main {
 					nbtTileEntityNew.merge(nbtBlock);
 					debug("NBTNew (3): " + nbtTileEntityNew);
 
-					nbtTileEntityNew.setInteger("x", lBlockPos.getX());
-					nbtTileEntityNew.setInteger("y", lBlockPos.getY());
-					nbtTileEntityNew.setInteger("z", lBlockPos.getZ());
+					nbtTileEntityNew.setInteger("x", blockPos.getX());
+					nbtTileEntityNew.setInteger("y", blockPos.getY());
+					nbtTileEntityNew.setInteger("z", blockPos.getZ());
 
 					debug("NBTNew (4): " + nbtTileEntityNew);
 
 					if (!nbtTileEntityNew.equals(nbtTileEntityOld))
 					{
 						debug("NBTNew (5): " + nbtTileEntityNew);
-						lTileEntity.readFromNBT(nbtTileEntityNew);
-						lTileEntity.markDirty();
+						tile.readFromNBT(nbtTileEntityNew);
+						tile.markDirty();
 					}
 				}
 			}
@@ -233,6 +213,13 @@ public class Main {
 	private boolean checkValid(Block block, EntityPlayer player, World world, BlockPos pos, TileEntity tile, EnumHand hand, ItemStack item)
 	{
 		boolean result = true;
+		
+		if(tile == null)
+		{
+			logger.debug("Tile entity is null");
+			result = false;
+		}
+		
 		if (block == null)
 		{
 			logger.error("Block is null");
@@ -274,8 +261,6 @@ public class Main {
 			debug("Tile entity is null");
 			result = false;
 		}
-
-
 		return result;
 	}
 
