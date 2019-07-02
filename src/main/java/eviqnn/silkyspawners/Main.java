@@ -15,13 +15,17 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityMobSpawner;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.WeightedSpawnerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -30,6 +34,8 @@ import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Objects;
@@ -269,6 +275,25 @@ public class Main {
 		ItemStack stack = new ItemStack(block,1, meta);
 		world.setBlockToAir(pos);
 		stack.setTagInfo("BlockEntityTag", tileData);
+		NBTTagCompound display = new NBTTagCompound();
+		MobSpawnerBaseLogic tileMobSpawn = ((TileEntityMobSpawner) tile).getSpawnerBaseLogic();
+		Object spawnDataObj = ReflectionHelper.getPrivateValue(MobSpawnerBaseLogic.class, tileMobSpawn, "spawnData", null);
+		Debug.debug("Spawn Data: " + spawnDataObj);
+		Debug.debug("Spawn Data Class: " + spawnDataObj.getClass());
+		if (spawnDataObj instanceof WeightedSpawnerEntity)
+		{
+			WeightedSpawnerEntity spawnData = (WeightedSpawnerEntity) spawnDataObj;
+			String entityIDstr = spawnData.getNbt().getString("id");
+			String entityIDEntity = ResourceLocation.splitObjectName(entityIDstr)[1];
+			entityIDEntity = entityIDEntity.replace("_", " ");
+			entityIDEntity = WordUtils.capitalizeFully(entityIDEntity);
+			display.setString("Name", "§r" + entityIDEntity + "§r" + " Spawner");
+		}
+		else
+		{
+			display.setString("Name", "§rERROR Spawner");
+		}
+		stack.setTagInfo("display", display);
 		BlockUtil.blockDrop(world, pos, stack);
 	}
 }
