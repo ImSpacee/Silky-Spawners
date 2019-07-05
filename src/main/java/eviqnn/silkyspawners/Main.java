@@ -29,12 +29,12 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.logging.log4j.Logger;
 
@@ -277,7 +277,7 @@ public class Main {
 		stack.setTagInfo("BlockEntityTag", tileData);
 		NBTTagCompound display = new NBTTagCompound();
 		MobSpawnerBaseLogic tileMobSpawn = ((TileEntityMobSpawner) tile).getSpawnerBaseLogic();
-		Object spawnDataObj = ReflectionHelper.getPrivateValue(MobSpawnerBaseLogic.class, tileMobSpawn, "spawnData", null);
+		Object spawnDataObj = ObfuscationReflectionHelper.getPrivateValue(MobSpawnerBaseLogic.class, tileMobSpawn, "spawnData");
 		Debug.debug("Spawn Data: " + spawnDataObj);
 		Debug.debug("Spawn Data Class: " + spawnDataObj.getClass());
 		if (spawnDataObj instanceof WeightedSpawnerEntity)
