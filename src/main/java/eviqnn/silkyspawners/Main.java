@@ -1,8 +1,7 @@
 package eviqnn.silkyspawners;
 
-import eviqnn.silkyspawners.util.BlockUtil;
-import eviqnn.silkyspawners.util.Debug;
-import eviqnn.silkyspawners.util.References;
+import eviqnn.silkyspawners.items.*;
+import eviqnn.silkyspawners.util.*;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockMobSpawner;
@@ -29,23 +28,27 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Objects;
 
 
-@Mod(modid = References.MOD_ID, name = References.NAME, version = References.VERSION, acceptableRemoteVersions = "*")
+@Mod(modid = References.MOD_ID, name = References.NAME, version = References.VERSION)
 public class Main {
 
 	@Instance
 	public static Main instance;
+
+	//public static final SimpleNetworkWrapper WRAPPER = NetworkRegistry.INSTANCE.newSimpleChannel(References.MOD_ID); // If we need networking
 
 	public static Logger logger;
 
@@ -55,6 +58,7 @@ public class Main {
 		Debug.config = event.getSuggestedConfigurationFile();
 		logger = event.getModLog();
 		Debug.readProperties();
+		Items.init();
 		Debug.debug("Pre Initialization!");
 	}
 
@@ -271,28 +275,29 @@ public class Main {
 			Debug.debug("meta reduced to 0");
 			meta = 0;
 		}
-
-		ItemStack stack = new ItemStack(block,1, meta);
+		NBTTagCompound itemNBT = new NBTTagCompound();
+		itemNBT.setTag("BlockEntityTag", tileData);
+		ItemStack stack = new ItemStack(Items.itemSpawner, 1, meta, itemNBT);
 		world.setBlockToAir(pos);
 		stack.setTagInfo("BlockEntityTag", tileData);
 		NBTTagCompound display = new NBTTagCompound();
 		MobSpawnerBaseLogic tileMobSpawn = ((TileEntityMobSpawner) tile).getSpawnerBaseLogic();
-		Object spawnDataObj = ReflectionHelper.getPrivateValue(MobSpawnerBaseLogic.class, tileMobSpawn, "spawnData", null);
+		Object spawnDataObj = ObfuscationReflectionHelper.getPrivateValue(MobSpawnerBaseLogic.class, tileMobSpawn, "field_98282_f"); // what entity the spawner will have
 		Debug.debug("Spawn Data: " + spawnDataObj);
 		Debug.debug("Spawn Data Class: " + spawnDataObj.getClass());
-		if (spawnDataObj instanceof WeightedSpawnerEntity)
-		{
-			WeightedSpawnerEntity spawnData = (WeightedSpawnerEntity) spawnDataObj;
-			String entityIDstr = spawnData.getNbt().getString("id");
-			String entityIDEntity = ResourceLocation.splitObjectName(entityIDstr)[1];
-			entityIDEntity = entityIDEntity.replace("_", " ");
-			entityIDEntity = WordUtils.capitalizeFully(entityIDEntity);
-			display.setString("Name", "§r" + entityIDEntity + "§r" + " Spawner");
-		}
-		else
-		{
-			display.setString("Name", "§rERROR Spawner");
-		}
+		//if (spawnDataObj instanceof WeightedSpawnerEntity)
+		//{
+			//WeightedSpawnerEntity spawnData = (WeightedSpawnerEntity) spawnDataObj;
+			//String entityIDstr = spawnData.getNbt().getString("id");
+			//String entityIDEntity = ResourceLocation.splitObjectName(entityIDstr)[1];
+			//entityIDEntity = entityIDEntity.replace("_", " ");
+			//entityIDEntity = WordUtils.capitalizeFully(entityIDEntity);
+			//display.setString("Name", "§r" + entityIDEntity + " Spawner");
+		//}
+		//else
+		//{
+			//display.setString("Name", "§rERROR Spawner");
+		//}
 		stack.setTagInfo("display", display);
 		BlockUtil.blockDrop(world, pos, stack);
 	}
