@@ -275,19 +275,6 @@ public class SilkySpawners {
         Object spawnDataObj = ObfuscationReflectionHelper.getPrivateValue(MobSpawnerBaseLogic.class, tileMobSpawn, "field_98282_f"); // what entity the spawner will have
         SilkyConfig.debug("Spawn Data: " + spawnDataObj);
         SilkyConfig.debug("Spawn Data Class: " + spawnDataObj.getClass());
-        //if (spawnDataObj instanceof WeightedSpawnerEntity)
-        //{
-        //WeightedSpawnerEntity spawnData = (WeightedSpawnerEntity) spawnDataObj;
-        //String entityIDstr = spawnData.getNbt().getString("id");
-        //String entityIDEntity = ResourceLocation.splitObjectName(entityIDstr)[1];
-        //entityIDEntity = entityIDEntity.replace("_", " ");
-        //entityIDEntity = WordUtils.capitalizeFully(entityIDEntity);
-        //display.setString("Name", "§r" + entityIDEntity + " Spawner");
-        //}
-        //else
-        //{
-        //display.setString("Name", "§rERROR Spawner");
-        //}
         stack.setTagInfo("display", display);
         BlockUtil.blockDrop(world, pos, stack);
     }
