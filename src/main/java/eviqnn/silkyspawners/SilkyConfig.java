@@ -1,18 +1,19 @@
 package eviqnn.silkyspawners;
 
-import eviqnn.silkyspawners.proxy.CommonProxy;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Level;
 
 public class SilkyConfig
 {
-    public static final String CATEGORY_GENERAL = "General";
+    private static final String CATEGORY_GENERAL = "General";
 
-    public static boolean canDebug = true;
+    private static Configuration config;
+
+    private static boolean canDebug = true;
 
     public static void readConfig()
     {
-        Configuration cfg = CommonProxy.config;
+        Configuration cfg = SilkyConfig.config;
         try
         {
             initGenConfig(cfg);
@@ -26,6 +27,24 @@ public class SilkyConfig
         }
     }
 
+    public static Configuration getConfig() {
+        return config;
+    }
+
+    public static void setConfig(Configuration config) {
+        if (config != null) {
+            SilkyConfig.config = config;
+        }
+    }
+
+    public static boolean canDebug() {
+        return canDebug;
+    }
+
+    public static String getCategoryGeneral() {
+        return CATEGORY_GENERAL;
+    }
+
     private static void initGenConfig(Configuration cfg)
     {
         cfg.addCustomCategoryComment(CATEGORY_GENERAL, "general config");
@@ -35,7 +54,7 @@ public class SilkyConfig
 
     public static void debug(Object object)
     {
-        if (canDebug == true)
+        if (canDebug)
         {
             SilkySpawners.logger.debug(object);
         }

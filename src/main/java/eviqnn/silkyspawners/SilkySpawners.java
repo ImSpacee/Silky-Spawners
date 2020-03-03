@@ -1,6 +1,5 @@
 package eviqnn.silkyspawners;
 
-import eviqnn.silkyspawners.proxy.CommonProxy;
 import eviqnn.silkyspawners.registry.ItemRegistry;
 import eviqnn.silkyspawners.util.BlockUtil;
 import net.minecraft.block.Block;
@@ -21,18 +20,19 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.util.Objects;
 
 @Mod(
@@ -46,10 +46,7 @@ public class SilkySpawners {
 
     static final String ID = "silkyspawners";
     static final String NAME = "silkyspawners";
-    static final String VERSION = "1.3";
-
-    @SidedProxy(clientSide = "eviqnn.silkyspawners.proxy.ClientProxy", serverSide = "eviqnn.silkyspawners.proxy.ServerProxy")
-    private static CommonProxy proxy;
+    static final String VERSION = "1.3.1";
 
     @Instance
     private static SilkySpawners instance;
@@ -60,7 +57,8 @@ public class SilkySpawners {
     public static void preInit(FMLPreInitializationEvent event)
     {
         logger = event.getModLog();
-        proxy.preInit(event);
+        File directory = event.getModConfigurationDirectory();
+        SilkyConfig.setConfig(new Configuration(new File(directory.getPath(), "silkyspawners.cfg")));
         SilkyConfig.readConfig();
         ItemRegistry.init();
     }
@@ -69,6 +67,15 @@ public class SilkySpawners {
     public static void init(FMLInitializationEvent event)
     {
         MinecraftForge.EVENT_BUS.register(instance);
+    }
+
+    @EventHandler
+    public void postInit(FMLPostInitializationEvent e)
+    {
+        if (SilkyConfig.getConfig().hasChanged())
+        {
+            SilkyConfig.getConfig().save();
+        }
     }
 
     @SubscribeEvent
@@ -272,9 +279,7 @@ public class SilkySpawners {
         stack.setTagInfo("BlockEntityTag", tileData);
         NBTTagCompound display = new NBTTagCompound();
         MobSpawnerBaseLogic tileMobSpawn = ((TileEntityMobSpawner) tile).getSpawnerBaseLogic();
-        Object spawnDataObj = ObfuscationReflectionHelper.getPrivateValue(MobSpawnerBaseLogic.class, tileMobSpawn, "field_98282_f"); // what entity the spawner will have
-        SilkyConfig.debug("Spawn Data: " + spawnDataObj);
-        SilkyConfig.debug("Spawn Data Class: " + spawnDataObj.getClass());
+        SilkyConfig.debug("Spawn Data: " + tileMobSpawn.spawnData);
         stack.setTagInfo("display", display);
         BlockUtil.blockDrop(world, pos, stack);
     }
