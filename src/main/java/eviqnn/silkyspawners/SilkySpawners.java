@@ -135,7 +135,7 @@ public class SilkySpawners {
         IBlockState state = e.getPlacedBlock();
         Entity entity = e.getEntity();
         BlockPos blockPos = e.getPos();
-        assert entity != null;
+        if (entity == null) return;
         World world = entity.getEntityWorld();
         TileEntity tile = world.getTileEntity(blockPos);
 
