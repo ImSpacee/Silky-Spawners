@@ -75,8 +75,8 @@ dependencies {
     //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
     //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
-    runtimeOnly "2924:91:Quark-r1.6-179@jar" // for testing issue #7
-    runtimeOnly "2746:11:AutoRegLib-1.3-32@jar" // for testing issue #7
+    //runtimeOnly "2924:91:Quark-r1.6-179@jar" // for testing issue #7
+    //runtimeOnly "2746:11:AutoRegLib-1.3-32@jar" // for testing issue #7
 
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
