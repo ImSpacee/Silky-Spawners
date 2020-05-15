@@ -7,6 +7,7 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
+apply plugin: "java"
 apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
@@ -52,6 +53,9 @@ dependencies {
     //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
     //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
+    runtimeOnly "2924:91:Quark-r1.6-179@jar"
+    runtimeOnly "2746:11:AutoRegLib-1.3-32@jar"
+
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
@@ -81,5 +85,13 @@ processResources {
 jar {
     manifest {
         attributes 'FMLAT': 'silkyspawners_at.cfg'
+    }
+}
+
+repositories {
+    ivy {
+        url "https://google.com/404"
+        ivyPattern("https://google.com/404") // Workaround for https://github.com/gradle/gradle/issues/4107
+        artifactPattern("https://media.forgecdn.net/files/[organisation]/[module]/[revision].[ext]")
     }
 }
