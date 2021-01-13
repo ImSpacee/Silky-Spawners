@@ -1,4 +1,4 @@
-package eviqnn.silkyspawners.registry;
+package moe.spce.silkyspawners.registry;
 
 import net.minecraft.entity.EntityList;
 import net.minecraft.init.Blocks;

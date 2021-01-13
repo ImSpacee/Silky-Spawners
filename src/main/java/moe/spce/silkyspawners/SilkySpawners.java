@@ -1,7 +1,7 @@
-package eviqnn.silkyspawners;
+package moe.spce.silkyspawners;
 
-import eviqnn.silkyspawners.registry.ItemRegistry;
-import eviqnn.silkyspawners.util.BlockUtil;
+import moe.spce.silkyspawners.registry.ItemRegistry;
+import moe.spce.silkyspawners.util.BlockUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockMobSpawner;
 import net.minecraft.block.state.IBlockState;
@@ -46,7 +46,7 @@ public class SilkySpawners {
 
     static final String ID = "silkyspawners";
     static final String NAME = "silkyspawners";
-    static final String VERSION = "1.3.1";
+    static final String VERSION = "1.3.2";
 
     @Instance
     private static SilkySpawners instance;

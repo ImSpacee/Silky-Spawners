@@ -1,4 +1,4 @@
-package eviqnn.silkyspawners.registry;
+package moe.spce.silkyspawners.registry;
 
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;

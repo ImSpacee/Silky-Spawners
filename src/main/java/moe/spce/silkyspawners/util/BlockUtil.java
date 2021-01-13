@@ -1,4 +1,4 @@
-package eviqnn.silkyspawners.util;
+package moe.spce.silkyspawners.util;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;

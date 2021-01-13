@@ -1,4 +1,4 @@
-package eviqnn.silkyspawners;
+package moe.spce.silkyspawners;
 
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Level;
